@@ -3,7 +3,7 @@ const BUILD_DIR = './build';
 
 const gulp = require("gulp");
 const babel = require("gulp-babel");
-const sass = require("gulp-sass");
+const sass = require('gulp-sass')(require('sass'));
 const sourcemaps = require("gulp-sourcemaps");
 const replace = require("gulp-replace");
 const terser = require("gulp-terser");
@@ -40,6 +40,7 @@ const fs = require("fs");
 [].forEach.call(
 	[
 		SRC_DIR + "/script/index.js", 
+		SRC_DIR + "/script/script.js", 
 		SRC_DIR + "/sass/index.scss"
 	],
 	(file) => {
@@ -105,7 +106,7 @@ exports.server = server;
 // Обработка JS
 const scripts = () => {
 	return gulp
-		.src(SRC_DIR + "/script/index.js")
+		.src(SRC_DIR + "/script/*.js")
 		.pipe(
 			babel({
 				presets: ["@babel/preset-env"],
@@ -137,11 +138,9 @@ exports.copy = copy;
 const paths = () => {
 	return gulp
 		.src(BUILD_DIR + "/*.html")
-		.pipe(replace(/"sass\/([^\.]+)\.scss/, '"./assets/css/$1.css'))
+		.pipe(replace(/\.\/sass\/([^\.]+)\.scss"/g, './assets/css/$1.css"'))
+		.pipe(replace(/\.\/script\/([^\.]+)\.js"/g, './assets/js/$1.js"'))
 		.pipe(replace('href="../build', 'href=".'))
-		.pipe(
-			replace(/(<script src=")(script)\/(index.js">)/, "$1./assets/js/$3")
-		)
 		.pipe(replace('src="../build', 'src=".'))
 		// .pipe(replace("upload/", "./assets/images/upload/"))
 		.pipe(replace('"images/', '"./assets/images/'))
@@ -169,5 +168,8 @@ exports.default = gulp.series(
 	paths,
 	gulp.parallel(watch, server)
 );
+
+
+
 
 
